@@ -1,0 +1,16 @@
+{
+    "require": {
+        "php": "~7.1",
+        "easyswoole/easyswoole": "3.3.7",
+        "easyswoole/redis-pool": "^2.1",
+        "easyswoole/orm": "^1.4",
+        "easyswoole/verifycode": "3.x",
+        "easyswoole/jwt": "^1.1",
+        "easyswoole/hot-reload": "^0.1.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "App/"
+        }
+    }
+}

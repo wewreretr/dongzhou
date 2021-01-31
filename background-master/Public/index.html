@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <title>页面加载中...</title>
+    <link rel="icon" type="image/ico" href="kernel/favicon.ico"/>
+
+    <link rel="stylesheet" href="minor/nprogress/nprogress.css"/>
+    <link rel="stylesheet" href="minor/iCheck/skins/flat/green.css"/>
+    <link rel="stylesheet" href="minor/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="minor/font-awesome/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="kernel/custom.min.css"/>
+    <link rel="stylesheet" href="kernel/app.css"/>
+</head>
+<body class="nav-md login">
+<div class="container body">
+    <div id="body" class="main_container"></div>
+</div>
+
+<script src="minor/jquery/dist/jquery.min.js"></script>
+<script src="minor/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="minor/iCheck/icheck.min.js"></script>
+<script src="minor/nprogress/nprogress.js"></script>
+<script src="minor/validator/validator.js"></script>
+<script src="minor/fastclick/lib/fastclick.js"></script>
+<script src="kernel/custom.dev.js"></script>
+
+<script src="kernel/san.min.js"></script>
+<script src="kernel/app.js"></script>
+<script>
+    // 容器内容组件
+    let Core = san.defineComponent({})
+    // 页面容器组件
+    let App = san.defineComponent({
+        template: '<div class="page_loading {{hide ? "hide" : ""}}"></div>',
+
+        // 打开首页
+        openHome: function () {
+            request(this, false, '/home/index', {}, function (self, res) {
+                self.data.set('debug', res.debug)
+                if (res.code === 202) {
+                    alert({center: true, color: 'bg-danger'}, {title: '提示', body: res.msg}, {needLogin: true})
+                } else if (res.code === 201) {
+                    self.openLogin(self)
+                } else if (res.code === 200) {
+                    request(self, true, '/page/home.js', {}, function () {
+                        $('body').removeClass('login')
+                        let core = new Core({owner: self, source: '<x-core/>'})
+                        core.attach($('#body').parent().get(0))
+                    }, function () {
+                        alert({center: true, color: 'bg-danger'}, {title: '提示', body: '页面打开失败，请重试'})
+                    })
+                }
+            }, function (self, err) {
+                alert({center: true, color: 'bg-danger'}, {title: '提示', body: err})
+            })
+        },
+
+        // 打开登录
+        openLogin: function (self) {
+            if (self === undefined) self = this
+            let debug = self.data.get('debug')
+            request(self, true, '/page/login.js', {}, function () {
+                $('#body').html('')
+                let core = new Core({owner: self, source: '<x-core debug="' + debug + '"/>'})
+                core.attach(document.getElementById('body'))
+                $('#login input').off('keydown').on('keydown', function (e) {
+                    if (e.keyCode === 13) core.submit()
+                })
+            })
+        },
+
+        // 初始页面
+        initData: function () {
+            let currentRoute = localStorage.getItem('current_route')
+            if(currentRoute){
+
+            }
+            this.openHome()
+            return {debug: false};
+        }
+    });
+
+    let app = new App()
+    app.attach(document.getElementById('body'));
+</script>
+</body>
+</html>
